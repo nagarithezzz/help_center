@@ -5,8 +5,6 @@ import 'package:hc/routes/routes.dart';
 import 'package:hc/screens/common/login_screen/login_screen.dart';
 import 'package:hc/splash_screen/splash_screen.dart';
 
-import 'screens/common/root_page.dart';
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   InitialBindings().dependencies();
@@ -27,7 +25,6 @@ class MyApp extends StatelessWidget {
       ),
       home: SplashScreen(),
       getPages: Approutes.routes(),
-      initialRoute: RootScreen.routeName,
     );
   }
 }

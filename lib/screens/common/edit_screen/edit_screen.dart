@@ -54,41 +54,41 @@ class EditScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text("Category", style: TextStyle(fontSize: 16)),
-                  Obx(() {
-                    final selectedValue =
-                        selectedCategory ?? controller.category_value.value;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 0, horizontal: 6),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(),
-                      ),
-                      child: DropdownButton<String>(
-                        elevation: 8,
-                        borderRadius: BorderRadius.circular(10),
-                        underline: Container(),
-                        hint: const Text("Select"),
-                        value: selectedValue, // Set the selected value
-                        items: controller.category.keys
-                            .where((category) =>
-                                category ==
-                                selectedValue) // Filter only the selected category
-                            .map((String category) {
-                          return DropdownMenuItem<String>(
-                            value: category,
-                            child: Text(
-                              category,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          // You can leave this empty to prevent changing the value
-                        },
-                      ),
-                    );
-                  }),
+                  // Obx(() {
+                  //   final selectedValue =
+                  //       selectedCategory ?? controller.category_value.value;
+                  //   return Container(
+                  //     padding: const EdgeInsets.symmetric(
+                  //         vertical: 0, horizontal: 6),
+                  //     decoration: BoxDecoration(
+                  //       borderRadius: BorderRadius.circular(6),
+                  //       border: Border.all(),
+                  //     ),
+                  //     child: DropdownButton<String>(
+                  //       elevation: 8,
+                  //       borderRadius: BorderRadius.circular(10),
+                  //       underline: Container(),
+                  //       hint: const Text("Select"),
+                  //       value: selectedValue, // Set the selected value
+                  //       items: controller.category.keys
+                  //           .where((category) =>
+                  //               category ==
+                  //               selectedValue) // Filter only the selected category
+                  //           .map((String category) {
+                  //         return DropdownMenuItem<String>(
+                  //           value: category,
+                  //           child: Text(
+                  //             category,
+                  //             style: const TextStyle(fontSize: 12),
+                  //           ),
+                  //         );
+                  //       }).toList(),
+                  //       onChanged: (String? newValue) {
+                  //         // You can leave this empty to prevent changing the value
+                  //       },
+                  //     ),
+                  //   );
+                  // }),
                 ],
               ),
               const SizedBox(

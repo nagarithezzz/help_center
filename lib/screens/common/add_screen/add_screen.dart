@@ -8,6 +8,7 @@ import 'package:hc/utils/utils.dart';
 class AddScreen extends StatelessWidget {
   final String? title;
   final Incident? incident;
+
   const AddScreen({Key? key, this.title, this.incident}) : super(key: key);
 
   static String routeName = "/addScreen";
@@ -16,9 +17,9 @@ class AddScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     String screenTitle = title ?? "Raise Incident";
     TextEditingController desc = TextEditingController();
-    //remove during production
     DataController controller = Get.put(DataController());
-
+    String? selectedSubCategory;
+    controller.fetchCategories();
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -50,38 +51,34 @@ class AddScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 16),
                   ),
                   Obx(() {
+                    List<DropdownMenuItem<String>> dropdownItems =
+                        controller.categories
+                            .map((category) => DropdownMenuItem<String>(
+                                  value: category
+                                      .toString(), // Ensure the value is a string
+                                  child: Text(category.toString()),
+                                ))
+                            .toList();
+
                     return Container(
                       padding: const EdgeInsets.symmetric(
                           vertical: 0, horizontal: 6),
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all()),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(),
+                      ),
                       child: DropdownButton<String>(
-                        elevation: 8, // Adjust the elevation (shadow)
-                        borderRadius:
-                            BorderRadius.circular(10), // Round the corners
+                        elevation: 8,
+                        borderRadius: BorderRadius.circular(10),
                         underline: Container(),
                         hint: const Text("Select"),
-                        value: incident?.category ??
-                            controller.category_value.value,
-                        items: controller.category.keys.map((String category) {
-                          return DropdownMenuItem<String>(
-                            value: category,
-                            child: Text(
-                              category,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          controller.category_value.value = newValue ?? "";
-                          if (controller.category_value.value != "") {
-                            controller.sub_category.value = controller.category[
-                                    controller.category_value.value] ??
-                                [];
-                            controller.sub_category_value.value =
-                                controller.sub_category[0];
+                        items: dropdownItems,
+                        onChanged: (selectedCategory) {
+                          if (selectedCategory != null) {
+                            controller.fetchSubCategories(selectedCategory);
                           }
+                          print("Selected category: $selectedCategory");
+                          selectedSubCategory = null;
                         },
                       ),
                     );
@@ -100,31 +97,28 @@ class AddScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 16),
                   ),
                   Obx(() {
+                    List<DropdownMenuItem<String>> subCategoryDropdownItems =
+                        controller.subCategories
+                            .map((subCategory) => DropdownMenuItem<String>(
+                                  value: subCategory['subcategoryName'],
+                                  child: Text(subCategory['subcategoryName']),
+                                ))
+                            .toList();
                     return Container(
                       padding: const EdgeInsets.symmetric(
                           vertical: 0, horizontal: 6),
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all()),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(),
+                      ),
                       child: DropdownButton<String>(
-                        elevation: 8, // Adjust the elevation (shadow)
-                        borderRadius:
-                            BorderRadius.circular(10), // Round the corners
+                        elevation: 8,
+                        borderRadius: BorderRadius.circular(10),
                         underline: Container(),
                         hint: const Text("Select"),
-                        value: incident?.subCategory ??
-                            controller.sub_category_value.value,
-                        items: controller
-                            .category[controller.category_value.value]!
-                            .map((String category) {
-                          return DropdownMenuItem<String>(
-                            value: category,
-                            child: Text(category,
-                                style: const TextStyle(fontSize: 12)),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          controller.sub_category_value.value = newValue ?? "";
+                        items: subCategoryDropdownItems,
+                        onChanged: (selectedSubCategory) {
+                          print("Selected subcategory: $selectedSubCategory");
                         },
                       ),
                     );
@@ -208,9 +202,7 @@ class AddScreen extends StatelessWidget {
               ),
               Center(
                 child: GestureDetector(
-                  onTap: () {
-                    // controller.handleApiRequest(Incident.generateRandom());
-                  },
+                  onTap: () {},
                   child: Container(
                     width: 180,
                     decoration: BoxDecoration(

@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
     await checkDatabase();
 
     // Add a delay of 5 seconds before navigating to the next screen
-    await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(Duration(seconds: 3));
 
     // Navigate to the appropriate screen based on your logic
     if (!hasNavigated) {

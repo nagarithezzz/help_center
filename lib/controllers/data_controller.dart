@@ -1,8 +1,6 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'dart:io';
-
-import 'package:dio/dio.dart' as dio; // Using an alias for dio
+import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart' as dio;
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
 import 'package:hc/models/incident.dart';
@@ -15,13 +13,9 @@ class DataController extends GetxController {
   double uploadProgress = 0.0; // Progress variable
   bool isUploading = false; // Indicates whether a file is being uploaded
 
-  //for dropdowns
-  //Note: Load all these data from the API in starting of the app
-  //add onInit() funtion
   @override
   void onInit() {
     super.onInit();
-    fetchAll();
   }
 
   RxList<Incident> all_Incident = RxList();
@@ -30,41 +24,75 @@ class DataController extends GetxController {
   RxString fileName = "".obs;
   RxInt solved = 2.obs;
   RxInt total = 8.obs;
+  RxString selectedCategory = "".obs;
 
-  RxMap<String, List<String>> category = RxMap({
-    "ACADEMICS": [
-      "COURSE REGISTRATION",
-      "INTERNSHIP",
-      "LMS",
-      "MOODLE",
-      "OTHERS",
-      "PROJECT -RESEARCH",
-      "WEBINAR",
-      "WORKSHOP"
-    ],
-    "ADMISSION": [
-      "ADMISSION -RELATED",
-      "HOSTEL-ALLOTMENTS",
-      "OTHERS",
-      "PAYMENTS"
-    ],
-    "COE-Controller of Examinations": [
-      "CERTIFICATE VERIFICATION",
-      "CERTIFICATES",
-      "EXAMINATIONS",
-      "OTHERS",
-      "TRANSCRIPTS"
-    ],
-    "COURSE REGISTRATION": [
-      "LOGIN Incident",
-      "REGISTRATION Incident",
-      "OTHERS"
-    ],
-  });
-  RxList<String> sub_category = RxList([]);
+  RxList<String> categories = <String>[].obs;
+  RxList<Map<String, dynamic>> subCategories = <Map<String, dynamic>>[].obs;
+  Future<void> fetchSubCategories(String selectedCategory) async {
+    final String url =
+        'https://vithelpcenter.vit.ac.in/vitcc-help-center/getSubCategoryMobile';
 
-  RxString category_value = RxString("ACADEMICS");
-  RxString sub_category_value = RxString("INTERNSHIP");
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'category': selectedCategory,
+          'clientId': 'HC_MOBILE_APP',
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> subCategoryList = jsonDecode(response.body);
+
+        subCategories.assignAll(subCategoryList.cast<Map<String, dynamic>>());
+      } else {
+        print(
+            'Failed to load subcategories. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle exceptions (network errors, etc.)
+      print('Error fetching subcategories: $e');
+    }
+  }
+
+  Future<void> fetchCategories() async {
+    print("Fetching");
+    try {
+      isloading = RxStatus.loading();
+
+      String apiUrl =
+          'https://vithelpcenter.vit.ac.in/vitcc-help-center/getCategorListMobile';
+
+      // Define the request body
+      Map<String, dynamic> requestBody = {
+        "clientId": "HC_MOBILE_APP",
+      };
+
+      dio.Response response = await dio.Dio().post(
+        apiUrl,
+        data: requestBody,
+      );
+
+      if (response.statusCode == 200) {
+        List<Map<String, dynamic>> categoriesData =
+            List<Map<String, dynamic>>.from(response.data);
+
+        categories.assignAll(
+            categoriesData.map((category) => category["categoryName"]));
+
+        isloading = RxStatus.success();
+      } else {
+        isloading = RxStatus.error();
+        Get.toNamed("/errorScreen",
+            arguments:
+                "Failed to fetch categories. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      isloading = RxStatus.error();
+      Get.toNamed("/errorScreen", arguments: "An error occurred: $e");
+    }
+  }
 
   //for file handle
   Rx<dio.MultipartFile?> filePart = Rx<dio.MultipartFile?>(null);
@@ -77,13 +105,11 @@ class DataController extends GetxController {
       File file = File(result.files.single.path ?? "");
       String fileName = file.path.split("/").last;
 
-      // Create a MultipartFile from the selected file
       dio.MultipartFile uploadedFile = await dio.MultipartFile.fromFile(
         file.path,
         filename: fileName,
       );
 
-      // Update the reactive variable directly
       filePart.value = uploadedFile;
     }
   }
@@ -124,28 +150,6 @@ class DataController extends GetxController {
         isloading = RxStatus.success();
         Get.toNamed("student/homeScreen");
       }
-    } catch (e) {
-      isloading = RxStatus.error();
-      Get.toNamed("/errorScreen", arguments: "An error occurred: $e");
-    }
-  }
-
-  Future<void> fetchAll() async {
-    try {
-      isloading = RxStatus.loading();
-      String jsonData = await rootBundle.loadString("assets/data/data.json");
-      Map<String, dynamic> data = json.decode(jsonData);
-
-      List<dynamic> complaints = data['complaints'];
-      for (var complaint in complaints) {
-        Incident newIncident = Incident.fromJson(complaint);
-        all_Incident.add(newIncident);
-        if (newIncident.status != "CLOSED") {
-          pending_incidents.add(newIncident);
-        }
-      }
-      isloading = RxStatus.success();
-      // Get.toNamed(HomeScreen.routeName);
     } catch (e) {
       isloading = RxStatus.error();
       Get.toNamed("/errorScreen", arguments: "An error occurred: $e");
