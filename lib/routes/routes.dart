@@ -12,7 +12,7 @@ class Approutes {
         GetPage(name: LoginScreen.routeName, page: () => const LoginScreen()),
         GetPage(
             name: LoadingScreen.routeName, page: () => const LoadingScreen()),
-        GetPage(name: AddScreen.routeName, page: () => const AddScreen()),
+        GetPage(name: AddScreen.routeName, page: () => AddScreen()),
         GetPage(name: HomeScreen.routeName, page: () => const HomeScreen()),
         GetPage(name: EditScreen.routeName, page: () => const EditScreen()),
         GetPage(

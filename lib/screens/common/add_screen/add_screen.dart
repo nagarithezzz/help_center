@@ -4,6 +4,8 @@ import '../../../controllers/data_controller.dart';
 import 'package:hc/models/incident.dart';
 import 'package:hc/screens/student/home_screen/home_screen.dart';
 import 'package:hc/utils/utils.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
 class AddScreen extends StatelessWidget {
   final String? title;
@@ -19,6 +21,7 @@ class AddScreen extends StatelessWidget {
     TextEditingController desc = TextEditingController();
     DataController controller = Get.put(DataController());
     String? selectedSubCategory;
+    File? selectedFile;
     controller.fetchCategories();
     return SafeArea(
       child: Scaffold(
@@ -176,8 +179,23 @@ class AddScreen extends StatelessWidget {
                     ],
                   ),
                   GestureDetector(
-                    onTap: () {
-                      controller.uploadFile();
+                    onTap: () async {
+                      FilePickerResult? result =
+                          await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['pdf', 'jpeg', 'jpg', 'png'],
+                      );
+
+                      if (result != null) {
+                        if (result.files.length == 1) {
+                          selectedFile = File(result.files.single.path!);
+                          print("Selected file: ${selectedFile?.path}");
+                        } else {
+                          print("Please select only one file.");
+                        }
+                      } else {
+                        print("File selection canceled.");
+                      }
                     },
                     child: Container(
                       width: 180,
@@ -198,7 +216,10 @@ class AddScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(
-                height: 36,
+                height: 12,
+              ),
+              const SizedBox(
+                height: 24,
               ),
               Center(
                 child: GestureDetector(

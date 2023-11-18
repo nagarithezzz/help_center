@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.add_box),
               title: const Text('Raise new tickets'),
               onTap: () {
-                Get.to(() => const AddScreen());
+                Get.to(() => AddScreen());
               },
             ),
             ListTile(
